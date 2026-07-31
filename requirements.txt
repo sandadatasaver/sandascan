@@ -1,0 +1,41 @@
+# SandaScan — Document Restoration Suite
+#
+# 📌 CORE DEPENDENCIES (required — everything works without OCR):
+#    Restoration, perspective correction, shadow removal, PDF export — all work.
+#
+# 📌 OPTIONAL (adds searchable text layer to PDFs):
+#    Skip these if you only need image restoration → PDF export.
+
+# ── Required: Image Restoration Engine ─────────────────────────────────
+opencv-python>=4.8.0
+numpy>=1.24.0
+Pillow>=10.0.0
+reportlab>=4.0
+
+# ── Required: GUI ──────────────────────────────────────────────────────
+customtkinter>=5.2.0
+
+# ── Optional: PDF/image utilities ─────────────────────────────────────
+# pypdf2>=3.0.0
+
+# ── Optional: OCR for Searchable PDFs ─────────────────────────────────
+# To get searchable PDFs with hidden text layer:
+#
+# Option A (recommended for Windows):
+#   1. pip install pytesseract
+#   2. Download & install Tesseract from:
+#      https://github.com/UB-Mannheim/tesseract/wiki
+#
+# Option B (Linux/Mac — faster):
+#   1. sudo apt install tesseract-ocr libtesseract-dev   (Linux)
+#      brew install tesseract                              (Mac)
+#   2. pip install tesserocr
+#
+# Option C (heavy but no system deps):
+#   1. pip install paddleocr paddlepaddle
+#
+# Uncomment below if you install pytesseract:
+# pytesseract>=0.3.10
+
+# ── Optional: Build Windows .exe ──────────────────────────────────────
+# pyinstaller>=6.0.0

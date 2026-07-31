@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SandaScan — Document Restoration Suite</title>
+        <meta name="description" content="Transform phone photos into scanner-quality, OCR-ready, searchable PDFs — completely offline.">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+    <link rel="apple-touch-icon" sizes="192x192" href="android-chrome-192x192.png">
+    <style>
+        :root {
+            --bg: #e8f5e9;
+            --bg-alt: #dcedc8;
+            --surface: #ffffff;
+            --surface2: #f1f8e9;
+            --border: #a5d6a7;
+            --text: #1b5e20;
+            --text2: #2e7d32;
+            --accent: #1b5e20;
+            --accent2: #2e7d32;
+            --green-light: #c8e6c9;
+            --green: #43a047;
+            --green-dark: #1b5e20;
+            --orange: #e65100;
+            --max-w: 960px;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+        .container { max-width: var(--max-w); margin: 0 auto; padding: 0 24px; }
+
+        /* Header */
+        header {
+            padding: 60px 0 30px;
+            text-align: center;
+            background: linear-gradient(180deg, #1b5e20 0%, #2e7d32 30%, #388e3c 60%, #43a047 100%);
+            border-bottom: 1px solid var(--border);
+        }
+        header .logo {
+            width: 100px; height: 100px;
+            margin-bottom: 16px;
+        }
+        header h1 { font-size: 2.6rem; font-weight: 800; letter-spacing: -1px; color: #ffffff; }
+        header h1 span { color: #a5d6a7; }
+        header .tagline {
+            font-size: 1.15rem; color: #c8e6c9;
+            margin-top: 8px; max-width: 600px; margin: 8px auto 0;
+        }
+        .badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 20px; padding: 4px 16px;
+            font-size: 0.8rem; color: #e8f5e9; margin: 12px 4px 0;
+        }
+        .badge.green { border-color: #a5d6a7; color: #ffffff; }
+        .badge.dark-green { border-color: #81c784; color: #ffffff; }
+
+        /* Sections */
+        section { padding: 60px 0; border-bottom: 1px solid var(--border); }
+        section:last-of-type { border-bottom: none; }
+        section:nth-child(even) { background: var(--bg-alt); }
+        h2 {
+            font-size: 1.8rem; font-weight: 700;
+            margin-bottom: 24px; text-align: center;
+        }
+        h2 span { color: var(--green-dark); }
+
+        /* Feature Grid */
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 16px;
+        }
+        .feature-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            transition: border-color 0.2s, transform 0.2s;
+        }
+        .feature-card:hover {
+            border-color: var(--green);
+            box-shadow: 0 4px 20px rgba(67, 160, 71, 0.15);
+            transform: translateY(-2px);
+        }
+        .feature-card .icon { font-size: 1.8rem; margin-bottom: 8px; }
+        .feature-card h3 { font-size: 1.05rem; margin-bottom: 6px; }
+        .feature-card p { font-size: 0.9rem; color: var(--text2); }
+
+        /* Steps */
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            counter-reset: step;
+        }
+        .step-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            counter-increment: step;
+            text-align: center;
+        }
+        .step-card::before {
+            content: counter(step);
+            display: inline-block;
+            width: 36px; height: 36px;
+            line-height: 36px;
+            border-radius: 50%;
+            background: var(--green);
+            color: #ffffff;
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-bottom: 12px;
+        }
+        .step-card h3 { font-size: 1rem; margin-bottom: 6px; }
+        .step-card p { font-size: 0.85rem; color: var(--text2); }
+
+        /* Comparison table */
+        .compare-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 0.9rem;
+        }
+        .compare-table th, .compare-table td {
+            padding: 12px 16px;
+            border: 1px solid var(--border);
+            text-align: left;
+        }
+        .compare-table th {
+            background: var(--surface);
+            font-weight: 600;
+        }
+        .compare-table tr:hover td { background: var(--surface2); }
+        .check { color: #2e7d32; }
+        .cross { color: var(--orange); }
+
+        /* FAQ */
+        .faq-list { max-width: 700px; margin: 0 auto; }
+        details {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin-bottom: 8px;
+            padding: 16px 20px;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+        details:hover { border-color: var(--green); }
+        details[open] { border-color: var(--green); }
+        details summary {
+            font-weight: 600;
+            outline: none;
+        }
+        details p {
+            margin-top: 10px;
+            color: var(--text2);
+            font-size: 0.9rem;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 40px 0;
+            color: var(--text2);
+            font-size: 0.85rem;
+            border-top: 1px solid var(--border);
+            background: var(--bg-alt);
+        }
+        footer a { color: var(--accent); text-decoration: none; }
+        footer a:hover { text-decoration: underline; }
+
+        /* Buttons */
+        .btn {
+            display: inline-block;
+            padding: 12px 28px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1rem;
+            text-decoration: none;
+            transition: opacity 0.2s;
+            margin: 4px;
+        }
+        .btn:hover { opacity: 0.9; }
+        .btn-primary {
+            background: #ffffff;
+            color: #1b5e20;
+        }
+        .btn-primary:hover { background: #e8f5e9; }
+        .btn-secondary { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); color: #ffffff; }
+        .btn-secondary:hover { background: rgba(255,255,255,0.25); }
+        .btn-group { text-align: center; margin-top: 32px; }
+
+        /* Responsive */
+        @media (max-width: 640px) {
+            header h1 { font-size: 1.8rem; }
+            h2 { font-size: 1.4rem; }
+            .feature-grid { grid-template-columns: 1fr; }
+            .steps { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="container">
+        <img src="sandascan_logo.png" alt="SandaScan Logo" class="logo">
+        <h1>Sanda<span>Scan</span></h1>
+        <p class="tagline">Transform phone photos into scanner-quality, OCR-ready, searchable PDFs — completely offline.</p>
+        <div>
+            <span class="badge green">✅ Works without Tesseract</span>
+            <span class="badge dark-green">🔒 100% Offline</span>
+            <span class="badge">🐍 Python + OpenCV</span>
+            <span class="badge">📄 MIT License</span>
+        </div>
+        <div class="btn-group">
+            <a href="https://github.com/sandadatasaver/sandascan" class="btn btn-primary">📦 GitHub Repository</a>
+            <a href="#features" class="btn btn-secondary">Learn More ↓</a>
+        </div>
+    </div>
+</header>
+
+<section id="features">
+    <div class="container">
+        <h2>✨ <span>Features</span></h2>
+        <div class="feature-grid">
+            <div class="feature-card">
+                <div class="icon">🖼️</div>
+                <h3>Auto Page Detection</h3>
+                <p>Automatically finds document edges in photos and crops out background clutter.</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">🔄</div>
+                <h3>Perspective Correction</h3>
+                <p>Straightens angled pages to produce a flat, rectangular view.</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">🌓</div>
+                <h3>Shadow Removal</h3>
+                <p>Eliminates phone/hand shadows and uneven lighting from document photos.</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">⚪</div>
+                <h3>Background Whitening</h3>
+                <p>Makes paper look freshly flatbed-scanned with clean white pages.</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">🔍</div>
+                <h3>Adaptive Sharpening</h3>
+                <p>Sharpens text for better readability without amplifying noise.</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">🧹</div>
+                <h3>Noise Removal</h3>
+                <p>Cleans camera noise, JPEG artifacts, and dust from scans.</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">📄</div>
+                <h3>PDF Export</h3>
+                <p>Multi-page A4 PDF at 300 or 600 DPI.</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">🔎</div>
+                <h3>Searchable PDF</h3>
+                <p>OCR text layer for full-text searchability (requires Tesseract).</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">📦</div>
+                <h3>Batch Processing</h3>
+                <p>Drop in a folder of photos — get back a single multi-page PDF.</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">🖥️</div>
+                <h3>Professional GUI</h3>
+                <p>Dark mode, before/after preview, progress tracking, keyboard shortcuts.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section>
+    <div class="container">
+        <h2>🎯 <span>How It Works</span></h2>
+        <div class="steps">
+            <div class="step-card">
+                <h3>Load Photos</h3>
+                <p>Drag in document photos or an entire folder. Supports JPG, PNG, TIFF & more.</p>
+            </div>
+            <div class="step-card">
+                <h3>Restore</h3>
+                <p>Page detection, perspective correction, shadow removal, whitening, sharpening — automatically.</p>
+            </div>
+            <div class="step-card">
+                <h3>Export PDF</h3>
+                <p>Get a professional multi-page A4 PDF at 300–600 DPI, optionally with searchable text.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section>
+    <div class="container">
+        <h2>📊 <span>What It Preserves</span></h2>
+        <table class="compare-table">
+            <thead>
+                <tr><th>Element</th><th>SandaScan</th><th>AI Image Generators</th></tr>
+            </thead>
+            <tbody>
+                <tr><td>Every letter & number</td><td class="check">✅ Preserved exactly</td><td class="cross">⚠️ May rewrite/invent</td></tr>
+                <tr><td>Signatures</td><td class="check">✅ Preserved exactly</td><td class="cross">⚠️ May be altered</td></tr>
+                <tr><td>Official stamps & seals</td><td class="check">✅ Preserved exactly</td><td class="cross">⚠️ May be hallucinated</td></tr>
+                <tr><td>Handwritten notes</td><td class="check">✅ Preserved exactly</td><td class="cross">⚠️ May be lost</td></tr>
+                <tr><td>Page layout & formatting</td><td class="check">✅ Preserved exactly</td><td class="cross">⚠️ May be rearranged</td></tr>
+            </tbody>
+        </table>
+        <p style="text-align:center;color:var(--text2);font-size:0.9rem;margin-top:12px;">
+            SandaScan uses computer vision — not AI generation. Every pixel is faithfully preserved.
+        </p>
+    </div>
+</section>
+
+<section>
+    <div class="container">
+        <h2>❓ <span>FAQ</span></h2>
+        <div class="faq-list">
+            <details>
+                <summary>Does SandaScan work without an internet connection?</summary>
+                <p>Yes! SandaScan runs completely offline. No data ever leaves your computer.</p>
+            </details>
+            <details>
+                <summary>Why is my searchable PDF not searchable?</summary>
+                <p>You need Tesseract OCR installed. Download from github.com/UB-Mannheim/tesseract/wiki, then run: pip install pytesseract</p>
+            </details>
+            <details>
+                <summary>Can I process multiple pages at once?</summary>
+                <p>Yes. Add all your images or an entire folder, then click Process All. They will be merged into a single multi-page PDF.</p>
+            </details>
+            <details>
+                <summary>What image formats are supported?</summary>
+                <p>JPG, JPEG, PNG, TIFF, TIF, and BMP.</p>
+            </details>
+            <details>
+                <summary>Will SandaScan alter my original images?</summary>
+                <p>No. Your original files are never modified. The app creates new PDF output.</p>
+            </details>
+            <details>
+                <summary>Does SandaScan use AI to generate text?</summary>
+                <p>No. SandaScan uses computer vision — not AI generation. It preserves every pixel faithfully, never rewriting or inventing text.</p>
+            </details>
+            <details>
+                <summary>What DPI should I use?</summary>
+                <p>300 DPI is recommended for most uses. Use 600 DPI for archival/master copies.</p>
+            </details>
+            <details>
+                <summary>Is SandaScan free?</summary>
+                <p>Yes. SandaScan is open-source under the MIT License.</p>
+            </details>
+        </div>
+    </div>
+</section>
+
+<footer>
+    <div class="container">
+        <p>SandaScan — Document Restoration Suite</p>
+        <p style="margin-top:4px;">
+            <a href="https://github.com/sandadatasaver/sandascan">GitHub</a> &middot;
+            <a href="https://davidsanda.com">davidsanda.com</a>
+        </p>
+        <p style="margin-top:12px; max-width: 600px; margin-left: auto; margin-right: auto; font-size: 0.8rem;">
+            SandaScan is developed and published by <strong>Bishop Dr. David Sanda</strong> (SandaApps).<br>
+            Open source under the MIT Licence.<br>
+            <em>Provided totally free for students, lecturers, editors and researchers alike,
+            for the glory of Jesus and the advancement of academic research.</em>
+        </p>
+        <p style="margin-top:12px;">&copy; 2026 David Sanda. All rights reserved.</p>
+    </div>
+</footer>
+
+</body>
+</html>
