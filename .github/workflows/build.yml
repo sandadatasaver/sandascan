@@ -132,7 +132,10 @@ jobs:
             All processing runs locally. Your documents are never uploaded.
 
             ---
-            Free and open source under the MIT Licence.
-            Developed by Bishop Dr. David Sanda (SandaApps).
+            SandaScan is developed and published by **Bishop Dr. David Sanda** (SandaApps).
+            Open source under the MIT License.
+
+            *Provided totally free for students, lecturers, editors and researchers
+            alike, for the glory of Jesus and the advancement of academic research.*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
