@@ -1,122 +1,127 @@
-# SandaScan — Cross-Platform Build & Release
-name: Build & Release
+name: Build and Release SandaScan
 
 on:
   push:
-    tags: ['v*']
+    tags:
+      - 'v*'
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
-  build-windows:
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-python@v6
-        with:
-          python-version: '3.12'
-      - name: Install deps
-        run: |
-          pip install -r requirements.txt pyinstaller
-      - name: Build
-        shell: cmd
-        run: >
-          pyinstaller --onefile --windowed --name "SandaScan.exe"
-          --icon "SandaScan\assets\sandascan_app_icon.ico"
-          --add-data "SandaScan\core;SandaScan\core"
-          --add-data "SandaScan\gui;SandaScan\gui"
-          --add-data "SandaScan\assets;SandaScan\assets"
-          --hidden-import PIL._tkinter_finder
-          run.py
-      - uses: actions/upload-artifact@v5
-        with:
-          name: SandaScan-Windows
-          path: dist/SandaScan.exe
-          if-no-files-found: error
+  build-and-release:
+    name: Build on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            artifact_name: SandaScan.exe
+            release_file: SandaScan_Windows.zip
+          - os: macos-latest
+            artifact_name: SandaScan
+            release_file: SandaScan_macOS.zip
+          - os: ubuntu-latest
+            artifact_name: SandaScan
+            release_file: SandaScan_Linux.tar.gz
 
-  build-macos:
-    runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-python@v6
-        with:
-          python-version: '3.12'
-      - name: Install deps
-        run: |
-          brew install tesseract
-          pip install -r requirements.txt pyinstaller
-      - name: Build
-        run: |
-          pyinstaller --onedir --windowed \
-            --name SandaScan \
-            --add-data "SandaScan/assets:SandaScan/assets" \
-            --add-data "SandaScan/core:SandaScan/core" \
-            --add-data "SandaScan/gui:SandaScan/gui" \
-            run.py
-      - name: Package
-        run: |
-          ditto -c -k --sequesterRsrc --keepParent dist/SandaScan SandaScan-macOS.zip
-      - uses: actions/upload-artifact@v5
-        with:
-          name: SandaScan-macOS
-          path: SandaScan-macOS.zip
-          if-no-files-found: error
+      - name: Check out repository
+        uses: actions/checkout@v5
 
-  build-linux:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-python@v6
+      - name: Set up Python
+        uses: actions/setup-python@v6
         with:
           python-version: '3.12'
-      - name: Install deps
+
+      - name: Install dependencies
         run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq tesseract-ocr tesseract-ocr-eng python3-tk || true
-          pip install -r requirements.txt pyinstaller
-      - name: Build
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pyinstaller
+
+      - name: Build with PyInstaller (Windows)
+        if: matrix.os == 'windows-latest'
         run: |
-          pyinstaller --onedir \
-            --name SandaScan \
-            --add-data "SandaScan/assets:SandaScan/assets" \
-            --add-data "SandaScan/core:SandaScan/core" \
-            --add-data "SandaScan/gui:SandaScan/gui" \
-            --hidden-import PIL._tkinter_finder \
-            run.py
-      - uses: actions/upload-artifact@v5
+          pyinstaller --onefile --noconsole --paths=. --add-data "SandaScan\core;SandaScan\core" --add-data "SandaScan\gui;SandaScan\gui" --add-data "SandaScan\assets;SandaScan\assets" --icon=SandaScan\assets\sandascan_app_icon.ico --hidden-import=pytesseract --hidden-import=PIL._tkinter_finder --name "SandaScan" run.py
+          powershell Compress-Archive -Path dist/SandaScan.exe -DestinationPath SandaScan_Windows.zip
+
+      - name: Build with PyInstaller (macOS)
+        if: matrix.os == 'macos-latest'
+        run: |
+          pyinstaller --onefile --windowed --paths=. --add-data "SandaScan/assets:SandaScan/assets" --add-data "SandaScan/core:SandaScan/core" --add-data "SandaScan/gui:SandaScan/gui" --hidden-import=pytesseract --hidden-import=PIL._tkinter_finder --name "SandaScan" run.py
+          cd dist
+          zip -r ../SandaScan_macOS.zip SandaScan.app
+          cd ..
+
+      - name: Build with PyInstaller (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          pyinstaller --onefile --paths=. --add-data "SandaScan/assets:SandaScan/assets" --add-data "SandaScan/core:SandaScan/core" --add-data "SandaScan/gui:SandaScan/gui" --hidden-import=pytesseract --hidden-import=PIL._tkinter_finder --name "SandaScan" run.py
+          tar -czf SandaScan_Linux.tar.gz -C dist SandaScan
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v5
         with:
-          name: SandaScan-Linux
-          path: dist/SandaScan
-          if-no-files-found: error
+          name: ${{ matrix.os }}-build
+          path: ${{ matrix.release_file }}
 
   create-release:
-    needs: [build-windows, build-macos, build-linux]
+    name: Create GitHub Release
+    needs: build-and-release
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
+    if: startsWith(github.ref, 'refs/tags/v')
     steps:
-      - uses: actions/download-artifact@v5
-      - name: Package
-        run: |
-          cp SandaScan-macOS/SandaScan-macOS.zip ./SandaScan-macOS.zip
-          chmod +x SandaScan-Linux/SandaScan
-          cp SandaScan-Linux/SandaScan ./SandaScan-linux
-          mkdir -p win
-          cp SandaScan-Windows/SandaScan.exe win/
-          cp LICENSE win/
-          cd win && zip -r ../SandaScan-Windows.zip . && cd ..
-      - uses: softprops/action-gh-release@v2
+      - name: Download all build artifacts
+        uses: actions/download-artifact@v5
+
+      - name: Create Release and Upload Assets
+        uses: softprops/action-gh-release@v2
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
           name: SandaScan ${{ github.ref_name }}
-          body: |
-            ## 📄 SandaScan ${{ github.ref_name }}
-            **Document Restoration Suite** — Transform phone photos into scanner-quality PDFs.
-            
-            ### 📥 Downloads
-            - 🪟 [Windows](SandaScan-Windows.zip)
-            - 🍎 [macOS](SandaScan-macOS.zip)
-            - 🐧 [Linux](SandaScan-linux)
           files: |
-            SandaScan-Windows.zip
-            SandaScan-macOS.zip
-            SandaScan-linux
+            **/*.zip
+            **/*.tar.gz
+          draft: false
+          prerelease: false
+          body: |
+            ## SandaScan ${{ github.ref_name }}
+
+            Document Restoration Suite — Transform phone photos into
+            scanner-quality, OCR-ready, searchable PDFs, completely offline.
+
+            ### Downloads
+            | Platform | File |
+            |---|---|
+            | Windows | `SandaScan_Windows.zip` |
+            | macOS | `SandaScan_macOS.zip` |
+            | Linux | `SandaScan_Linux.tar.gz` |
+
+            Download, extract, and run. No Python installation required.
+
+            ### Features
+            - Auto page detection and perspective correction
+            - Shadow removal and background whitening
+            - Adaptive sharpening and noise removal
+            - Multi-page A4 PDF export (300/600 DPI)
+            - Searchable PDF with OCR (Tesseract optional)
+            - Batch processing with progress tracking
+            - Professional dark-mode GUI
+            - Completely offline
+
+            ### Optional OCR
+            To read scanned documents, install
+            [Tesseract OCR](https://github.com/UB-Mannheim/tesseract/wiki),
+            restart SandaScan, and tick Enable OCR. Every other feature
+            works without it.
+
+            ### Privacy
+            All processing runs locally. Your documents are never uploaded.
+
+            ---
+            Free and open source under the MIT Licence.
+            Developed by Bishop Dr. David Sanda (SandaApps).
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
