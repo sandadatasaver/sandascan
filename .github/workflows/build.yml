@@ -48,6 +48,13 @@ jobs:
           pyinstaller --onefile --noconsole --paths=. --add-data "SandaScan\core;SandaScan\core" --add-data "SandaScan\gui;SandaScan\gui" --add-data "SandaScan\assets;SandaScan\assets" --icon=SandaScan\assets\sandascan_app_icon.ico --hidden-import=pytesseract --hidden-import=PIL._tkinter_finder --name "SandaScan" run.py
           powershell Compress-Archive -Path dist/SandaScan.exe -DestinationPath SandaScan_Windows.zip
 
+      - name: Build Inno Setup Installer (Windows)
+        if: matrix.os == 'windows-latest'
+        run: |
+          choco install innosetup -y --no-progress
+          "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" SandaScan_installer.iss
+          powershell Compress-Archive -Path "installer\SandaScan_v*.exe" -DestinationPath SandaScan_Installer.zip
+
       - name: Build with PyInstaller (macOS)
         if: matrix.os == 'macos-latest'
         run: |
@@ -66,7 +73,10 @@ jobs:
         uses: actions/upload-artifact@v5
         with:
           name: ${{ matrix.os }}-build
-          path: ${{ matrix.release_file }}
+          path: |
+            ${{ matrix.release_file }}
+            SandaScan_Installer.zip
+          if-no-files-found: ignore
 
   create-release:
     name: Create GitHub Release
@@ -95,9 +105,10 @@ jobs:
             ### Downloads
             | Platform | File |
             |---|---|
-            | Windows | `SandaScan_Windows.zip` |
-            | macOS | `SandaScan_macOS.zip` |
-            | Linux | `SandaScan_Linux.tar.gz` |
+            | 🪟 Windows | `SandaScan_Windows.zip` (portable) |
+            | 🪟 Windows Installer | `SandaScan_Installer.zip` (setup wizard) |
+            | 🍎 macOS | `SandaScan_macOS.zip` |
+            | 🐧 Linux | `SandaScan_Linux.tar.gz` |
 
             Download, extract, and run. No Python installation required.
 
