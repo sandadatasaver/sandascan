@@ -20,7 +20,7 @@
 ; ---------------------------------------------------------------
 
 #define MyAppName "SandaScan"
-#define MyAppVersion "1.0.1"
+#define MyAppVersion "1.0.3"
 #define MyAppPublisher "SandaApps"
 #define MyAppURL "https://davidsanda.com/sandascan"
 #define MyAppExeName "SandaScan.exe"

@@ -44,7 +44,7 @@ ctk.set_default_color_theme("blue")
 
 # ── Constants ──────────────────────────────────────────────────────────────
 APP_NAME = "SandaScan"
-APP_VERSION = "1.0.1"
+APP_VERSION = "1.0.3"
 WINDOW_WIDTH = 1100
 WINDOW_HEIGHT = 700
 SUPPORTED_FORMATS = (".jpg", ".jpeg", ".png", ".tiff", ".tif", ".bmp")
