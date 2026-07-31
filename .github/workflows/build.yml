@@ -50,10 +50,16 @@ jobs:
 
       - name: Build Inno Setup Installer (Windows)
         if: matrix.os == 'windows-latest'
+        uses: Minionguyjpro/Inno-Setup-Action@v1.2.4
+        with:
+          path: SandaScan_installer.iss
+          options: /Oinstaller
+
+      - name: Zip Installer (Windows)
+        if: matrix.os == 'windows-latest'
         run: |
-          choco install innosetup -y --no-progress
-          "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" SandaScan_installer.iss
-          powershell Compress-Archive -Path "installer\SandaScan_v*.exe" -DestinationPath SandaScan_Installer.zip
+          Get-ChildItem "installer\*.exe" | Compress-Archive -DestinationPath "SandaScan_Installer.zip" -Force
+          Get-ChildItem "SandaScan_Installer.zip" | Select-Object Name, Length
 
       - name: Build with PyInstaller (macOS)
         if: matrix.os == 'macos-latest'
