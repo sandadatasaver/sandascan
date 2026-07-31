@@ -97,15 +97,16 @@ jobs:
       - uses: actions/download-artifact@v5
       - name: Package
         run: |
-          cp SandaScan-macOS/SandaScan-macOS.zip SandaScan-macOS.zip
+          cp SandaScan-macOS/SandaScan-macOS.zip ./SandaScan-macOS.zip
           chmod +x SandaScan-Linux/SandaScan
-          cp SandaScan-Linux/SandaScan SandaScan-Linux
+          cp SandaScan-Linux/SandaScan ./SandaScan-linux
           mkdir -p win
           cp SandaScan-Windows/SandaScan.exe win/
           cp LICENSE win/
           cd win && zip -r ../SandaScan-Windows.zip . && cd ..
       - uses: softprops/action-gh-release@v2
         with:
+          token: ${{ secrets.GITHUB_TOKEN }}
           name: SandaScan ${{ github.ref_name }}
           body: |
             ## 📄 SandaScan ${{ github.ref_name }}
@@ -114,10 +115,8 @@ jobs:
             ### 📥 Downloads
             - 🪟 [Windows](SandaScan-Windows.zip)
             - 🍎 [macOS](SandaScan-macOS.zip)
-            - 🐧 [Linux](SandaScan-Linux)
+            - 🐧 [Linux](SandaScan-linux)
           files: |
             SandaScan-Windows.zip
             SandaScan-macOS.zip
-            SandaScan-Linux
-          draft: false
-          prerelease: false
+            SandaScan-linux
